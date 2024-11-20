@@ -1,0 +1,59 @@
+@{
+    ViewData["Title"] = "Get Did";
+    var token = ViewData["Token"] as string;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>Enter Values to Search</p>
+@if (!string.IsNullOrEmpty(token))
+{
+    <p>Token: @token</p>
+}
+else
+{
+    <form id="getDidForm">
+        <div class="row my-2">
+            <label class="col-lg-6" for="PhoneNumber">DID:</label>
+            <input class="col-lg-6" type="text" id="PhoneNumber" name="PhoneNumber" required />
+        </div>
+        <button class="btn btn-danger" type="button" onclick="getDid()" id="getDidButton">Disable Forwarding</button>
+        <div id="loadingIndicator" style="display: none;">Loading...</div>
+        <div id="responseContainer"></div>
+    </form>
+
+    <script>
+        async function getDid() {
+            // Disable the button and show loading indicator
+            document.getElementById('getDidButton').disabled = true;
+            document.getElementById('loadingIndicator').style.display = 'block';
+
+            // Retrieve input values
+            var did = document.getElementById('PhoneNumber').value;
+
+            // Make API call to api/getdid
+            var response = await fetch(`/api/Services/removeForwardRule?did=${did}&isPortal=1`);
+        @* var response = await fetch(`https://localhost:7057/api/did/removeForwardRule?did=${did}`);  *@
+
+                // Enable the button and hide loading indicator
+                document.getElementById('getDidButton').disabled = false;
+            document.getElementById('loadingIndicator').style.display = 'none';
+
+            if (response.ok) {
+                var result = await response.json();
+                // Display the result
+                if (result == "0") {
+                    document.getElementById('responseContainer').innerText = 'Disable Forwarding Failed.'; //JSON.stringify(result, null, 2);
+                }
+                else {
+                    document.getElementById('responseContainer').innerText = 'Success'; //JSON.stringify(result, null, 2);
+                }
+
+            } else {
+                var errorText = await response.text();
+                document.getElementById('responseContainer').innerText = `Error: ${errorText}`;
+                console.error('Error calling api/addforwardRule:', response.statusText);
+            }
+        }
+    </script>
+}

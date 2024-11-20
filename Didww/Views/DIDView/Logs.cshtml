@@ -1,0 +1,106 @@
+@{
+    ViewData["Title"] = "Logs";
+    var token = ViewData["Token"] as string;
+}
+<style>
+    .activeLink {
+        background-color: blue !important;
+        color:white !important;
+        padding: 5px !important;
+    }
+</style>
+<h1>@ViewData["Title"]</h1>
+
+<script>
+function myFunction() {
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("myInput");
+  filter = input.value.toUpperCase();
+  table = document.getElementById("example");
+  tr = table.getElementsByTagName("tr");
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[1];
+    if (td) {
+      txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) { 
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }       
+  }
+}
+</script> 
+
+@if (!string.IsNullOrEmpty(token))
+{
+    <p>Token: @token</p>
+}
+else
+{
+    <form id="getDidForm">
+        <select id="SelecType" onchange='javascript:getDid(1)' >
+    <option value="all">All</option>
+    <option value="ADD">Only Add</option>
+    <option value="REMOVE">Only Remove</option>
+  </select> 
+  <a id="id_1" href="javascript:getDid(1)">1 Day</a> | <a id="id_2" href="javascript:getDid(2)">7 Days</a> | 
+  <a id="id_3" href="javascript:getDid(3)">30 Days</a> | <a id="id_0" href="javascript:getDid(0)">Show All</a>
+  <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search in Params.." title="Type in a did">
+        <div id="loadingIndicator" style="display: none;">Loading...</div>        
+        <div id="responseContainer" style="padding-top: 20px;"></div>
+    </form>
+
+    <script>
+        async function getDid(option) {
+            // Disable the button and show loading indicator
+            document.getElementById('loadingIndicator').style.display = 'block';
+            
+            if(option ==1)
+            document.getElementById("id_1").classList.add("activeLink");
+            else
+            document.getElementById("id_1").classList.remove("activeLink");
+                        
+            if(option ==2)
+            document.getElementById("id_2").classList.add("activeLink");
+            else
+            document.getElementById("id_2").classList.remove("activeLink");
+                        
+            if(option ==3)
+            document.getElementById("id_3").classList.add("activeLink");
+            else
+            document.getElementById("id_3").classList.remove("activeLink");
+                        
+            if(option ==0)
+            document.getElementById("id_0").classList.add("activeLink");
+            else
+            document.getElementById("id_0").classList.remove("activeLink");
+
+            try {
+                // Make API call to api/getdid
+                var stype = document.getElementById('SelecType').value;
+                var response = await fetch("/api/Services/getLogs?type=" + stype + "&option=" + option);
+                // Enable the button and hide loading indicator
+                document.getElementById('loadingIndicator').style.display = 'none';
+
+                if (response.ok) {
+                    // Display the HTML table directly
+                    var htmlTable = await response.text();
+                    document.getElementById('responseContainer').innerHTML = htmlTable;
+                } else {
+                    // Display the error message
+                    var errorText = await response.text();
+                    document.getElementById('responseContainer').innerText = `Error: ${errorText}`;
+                    console.error('Error calling api/Services/getLogs:', response.statusText);
+                }
+            } catch (error) {
+                // Handle any unexpected errors
+                console.error('Unexpected error:', error);
+            }
+        }
+
+
+        getDid(1);
+    </script>
+
+}

@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = "Logged In";
+    var token = ViewData["Token"] as string;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>User Login Successfully</p>
+@if (!string.IsNullOrEmpty(token))
+{
+<p>Token: @token</p>
+}
+else
+{
+<p>Token not available</p>
+}

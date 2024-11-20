@@ -1,0 +1,85 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\7 Consepts\\DID\\didww-forwarder-main\\didww-forwarder-main\\didww\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{52FFA0D6-918D-4311-AF83-8EC7D8E5BA77}|Didww\\Didww.csproj|d:\\7 consepts\\did\\didww-forwarder-main\\didww-forwarder-main\\didww\\didww\\services\\phonenumbersservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{52FFA0D6-918D-4311-AF83-8EC7D8E5BA77}|Didww\\Didww.csproj|solutionrelative:didww\\services\\phonenumbersservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{52FFA0D6-918D-4311-AF83-8EC7D8E5BA77}|Didww\\Didww.csproj|d:\\7 consepts\\did\\didww-forwarder-main\\didww-forwarder-main\\didww\\didww\\services\\didwportalservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{52FFA0D6-918D-4311-AF83-8EC7D8E5BA77}|Didww\\Didww.csproj|solutionrelative:didww\\services\\didwportalservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{52FFA0D6-918D-4311-AF83-8EC7D8E5BA77}|Didww\\Didww.csproj|d:\\7 consepts\\did\\didww-forwarder-main\\didww-forwarder-main\\didww\\didww\\views\\didview\\logs.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{52FFA0D6-918D-4311-AF83-8EC7D8E5BA77}|Didww\\Didww.csproj|solutionrelative:didww\\views\\didview\\logs.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{52FFA0D6-918D-4311-AF83-8EC7D8E5BA77}|Didww\\Didww.csproj|d:\\7 consepts\\did\\didww-forwarder-main\\didww-forwarder-main\\didww\\didww\\views\\didview\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{52FFA0D6-918D-4311-AF83-8EC7D8E5BA77}|Didww\\Didww.csproj|solutionrelative:didww\\views\\didview\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "PhoneNumbersService.cs",
+              "DocumentMoniker": "D:\\7 Consepts\\DID\\didww-forwarder-main\\didww-forwarder-main\\didww\\Didww\\Services\\PhoneNumbersService.cs",
+              "RelativeDocumentMoniker": "Didww\\Services\\PhoneNumbersService.cs",
+              "ToolTip": "D:\\7 Consepts\\DID\\didww-forwarder-main\\didww-forwarder-main\\didww\\Didww\\Services\\PhoneNumbersService.cs",
+              "RelativeToolTip": "Didww\\Services\\PhoneNumbersService.cs",
+              "ViewState": "AQIAAAkAAAAAAAAAAAAAwCsAAAAIAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-03-28T15:34:14.196Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Logs.cshtml",
+              "DocumentMoniker": "D:\\7 Consepts\\DID\\didww-forwarder-main\\didww-forwarder-main\\didww\\Didww\\Views\\DIDView\\Logs.cshtml",
+              "RelativeDocumentMoniker": "Didww\\Views\\DIDView\\Logs.cshtml",
+              "ToolTip": "D:\\7 Consepts\\DID\\didww-forwarder-main\\didww-forwarder-main\\didww\\Didww\\Views\\DIDView\\Logs.cshtml",
+              "RelativeToolTip": "Didww\\Views\\DIDView\\Logs.cshtml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABsAAAA8AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2024-03-28T12:39:32.485Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\7 Consepts\\DID\\didww-forwarder-main\\didww-forwarder-main\\didww\\Didww\\Views\\DIDView\\Index.cshtml",
+              "RelativeDocumentMoniker": "Didww\\Views\\DIDView\\Index.cshtml",
+              "ToolTip": "D:\\7 Consepts\\DID\\didww-forwarder-main\\didww-forwarder-main\\didww\\Didww\\Views\\DIDView\\Index.cshtml",
+              "RelativeToolTip": "Didww\\Views\\DIDView\\Index.cshtml",
+              "ViewState": "AQIAAMUAAAAAAAAAAAAswOAAAAAhAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2024-03-28T11:54:40.521Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "DIDWPortalService.cs",
+              "DocumentMoniker": "D:\\7 Consepts\\DID\\didww-forwarder-main\\didww-forwarder-main\\didww\\Didww\\Services\\DIDWPortalService.cs",
+              "RelativeDocumentMoniker": "Didww\\Services\\DIDWPortalService.cs",
+              "ToolTip": "D:\\7 Consepts\\DID\\didww-forwarder-main\\didww-forwarder-main\\didww\\Didww\\Services\\DIDWPortalService.cs",
+              "RelativeToolTip": "Didww\\Services\\DIDWPortalService.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAABBAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-03-21T09:57:29.901Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

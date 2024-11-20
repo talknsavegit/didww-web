@@ -1,0 +1,245 @@
+@{
+    ViewData["Title"] = "Call Forwarding";
+    var token = ViewData["Token"] as string;
+}
+
+<h1>@ViewData["Title"]</h1>
+<style>
+    .input-wrapper {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+    .error-message {
+        color: red;
+        font-size: 12px;
+        margin-top: 4px;
+        position: absolute;
+        bottom: -20px; /* Adjust as needed */
+    }
+</style>
+<p>Enter Values to Add Forwarding</p>
+@if (!string.IsNullOrEmpty(token))
+{
+    <p>Token: @token</p>
+}
+else
+{
+    <form id="getDidForm" onsubmit="return validateForm()">
+        <div class="row my-2 mb-4">
+            <label class="col-6" for="DID">Enter DID Number (Source):</label>
+            <div class="col-6 input-wrapper">
+                <input type="text" id="DID" name="DID" placeholder="Enter DID Number e.g 18457485354" />
+                <div id="didError" class="error-message"></div>
+            </div>
+        </div>
+
+        <div class="row my-2 mb-4">
+            <label class="col-6" for="CountryCode">Choose DID Country:</label>
+        
+            <div class="col-6 input-wrapper">
+                <select  type="text" id="CountryCode" name="CountryCode">
+                </select>
+                <div id="countryCodeError" class="error-message"></div>
+            </div>
+        </div>
+        <div class="row my-2 mb-4">
+            <label class="col-6" for="PhoneNumber">Enter Destination Phone Number:</label>
+          
+            <div class="col-6 input-wrapper">
+                <input  type="text" id="PhoneNumber" placeholder="Enter Phone Number e.g 3441543209" name="PhoneNumber" />
+                <div id="phoneNumberError" class="error-message"></div>
+            </div>
+        </div>
+        <div class="d-flex">
+         @*    <button class="btn btn-primary" style="display:block" type="button" onclick="verifyNumber()" id="getVNButton">Verify Number</button>
+            <div id="loadingIndicator" style="display: none;">Loading...</div>
+            <br> *@
+       
+
+            <button class="btn btn-primary ml-1" style="display:block" type="button" onclick="getDid()" id="getDidButton">Enable Forwarding</button>
+            <div id="loadingIndicator" style="display: none;">Loading...</div>
+            <br>
+         
+        </div>
+        <div id="responseMessage"></div>
+        <div id="responseContainer"></div>
+    </form>
+
+    <script>
+        function validateForm() {
+            var didInput = document.getElementById("DID");
+            var countryCodeSelect = document.getElementById("CountryCode");
+            var phoneNumberInput = document.getElementById("PhoneNumber");
+
+            var isValid = true;
+
+            if (didInput.value === "") {
+                document.getElementById("didError").innerHTML = "Please enter a DID number.";
+                isValid = false;
+            } else {
+                document.getElementById("didError").innerHTML = "";
+            }
+
+            if (countryCodeSelect.value === "") {
+                document.getElementById("countryCodeError").innerHTML = "Please choose a destination country.";
+                isValid = false;
+            } else {
+                document.getElementById("countryCodeError").innerHTML = "";
+            }
+
+            if (phoneNumberInput.value === "") {
+                document.getElementById("phoneNumberError").innerHTML = "Please enter a phone number.";
+                isValid = false;
+            } else {
+                document.getElementById("phoneNumberError").innerHTML = "";
+            }
+
+            return isValid;
+        }
+        async function getDid() {
+      
+
+            // Retrieve input values
+            var phoneNumber = document.getElementById('PhoneNumber').value;
+            var did = document.getElementById('DID').value;
+            var countrycode = document.getElementById('CountryCode').value;
+
+            if (did === "") {
+                document.getElementById("didError").innerHTML = "Please enter a DID number.";
+                isValid = false;
+            } else {
+                document.getElementById("didError").innerHTML = "";
+            }
+
+            if (countrycode === "") {
+                document.getElementById("countryCodeError").innerHTML = "Please choose a destination country.";
+                isValid = false;
+            } else {
+                document.getElementById("countryCodeError").innerHTML = "";
+            }
+
+            if (phoneNumber === "") {
+                document.getElementById("phoneNumberError").innerHTML = "Please enter a phone number.";
+                isValid = false;
+            } else {
+                document.getElementById("phoneNumberError").innerHTML = "";
+            }
+            if (phoneNumber !== "" && countrycode !== "" && did !== "") {
+                // Disable the button and show loading indicator
+                document.getElementById('getDidButton').disabled = true;
+                document.getElementById('loadingIndicator').style.display = 'block';
+                // Make API call to api/getdid
+                var response = await fetch(`/api/Services/addforwardRule?phoneNumber=${phoneNumber}&did=${did}&countryCode=${countrycode}&isPortal=1`);
+
+                // Enable the button and hide loading indicator
+                document.getElementById('getDidButton').disabled = false;
+                document.getElementById('loadingIndicator').style.display = 'none';
+
+                if (response.ok) {
+                    var result = await response.json();
+                    // Display the result
+                    if (result == "0") {
+                        document.getElementById('responseMessage').innerText = "";
+                        document.getElementById('responseContainer').innerText = 'network error. please disable the forwarding first before enabling.'; //JSON.stringify(result, null, 2);
+                    }
+                    else if (result == "2") {
+                        document.getElementById('responseContainer').innerText = 'Invalid DID Number';
+                        document.getElementById('responseMessage').innerText = "";
+                    }
+                    else if (result == "3") {
+                        document.getElementById('responseContainer').innerText = 'Trunk not available';
+                        document.getElementById('responseMessage').innerText = "";
+                    }
+                    else if (result == "4") {
+                        document.getElementById('responseContainer').innerText = 'Failed';
+                        document.getElementById('responseMessage').innerText = "";
+                    }
+                    else if (result == "5") {
+                        document.getElementById('responseMessage').innerText = "";
+                        document.getElementById('responseContainer').innerText = 'Invalid provider'; //JSON.stringify(result, null, 2);
+                    }
+                    else {
+
+                        document.getElementById('responseContainer').innerText = 'Success'; //JSON.stringify(result, null, 2);
+                        document.getElementById('responseMessage').innerText = "";
+                    }
+
+                } else {
+                    // Display the error message
+                    var errorText = await response.text();
+                    document.getElementById('responseContainer').innerText = `Error: ${errorText}`;
+                    console.error('Error calling api/addforwardRule:', response.statusText);
+                }
+            }
+        }
+        async function verifyNumber() {
+            // Disable the button and show loading indicator
+            document.getElementById('getDidButton').disabled = true;
+            document.getElementById('loadingIndicator').style.display = 'block';
+
+            // Retrieve input values
+            var phoneNumber = document.getElementById('PhoneNumber').value;
+   
+
+            // Make API call to api/getdid
+            var response = await fetch(`/api/Services/VerifyNumber?phoneNumber=${phoneNumber}`);
+
+            // Enable the button and hide loading indicator
+            document.getElementById('getDidButton').disabled = false;
+            document.getElementById('loadingIndicator').style.display = 'none';
+
+            if (response.ok) {
+                var result = await response.json();
+                // Display the result
+                if (result == "1") {
+                    document.getElementById('responseMessage').innerText = "Its HotMobile Number";
+                    document.getElementById('responseContainer').innerText = "";
+                }else{
+                    document.getElementById('responseMessage').innerText = "Its not a HotMobile Number";
+                    document.getElementById('responseContainer').innerText = "";
+                    
+                }
+              
+                      
+            } 
+        }
+    </script>
+
+    <script>
+
+
+        function initSelBox_Country() {
+            var titelliste = [
+                { "name": "USA", "countrycode": "1" },
+                { "name": "Canada", "countrycode": "100" },
+                { "name": "UK", "countrycode": "44" },           
+                { "name": "France", "countrycode": "33" },
+                { "name": "South Africa", "countrycode": "27" },
+                { "name": "Australia", "countrycode": "61" },
+                { "name": "Brazil", "countrycode": "55" },
+                { "name": "Singapore", "countrycode": "65" },
+                { "name": "Spain", "countrycode": "34" },
+                { "name": "Mexico", "countrycode": "52" },
+                { "name": "Argentina", "countrycode": "54" },
+                { "name": "Chile", "countrycode": "56" }                
+            ];
+
+            var select = document.getElementById("CountryCode");
+            var optionFirst = document.createElement("option");
+            optionFirst.text = "Choose Country";
+            optionFirst.value = "";
+            select.add(optionFirst);
+
+            for (var i = 0; i < titelliste.length; i++) {
+                
+                var option = document.createElement("option");
+                option.text = titelliste[i].name;
+                option.value = titelliste[i].countrycode;
+                select.add(option);
+            }
+        }
+
+        initSelBox_Country();
+    </script>
+}

@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\Users\Administrator\Downloads\didww\didww\Didww\bin\Release\net7.0\publish\</_PublishTargetUrl>
+    <History>True|2024-05-18T20:44:20.0614316Z;True|2024-05-19T01:43:02.8594147+05:00;True|2024-05-19T01:31:53.3588125+05:00;True|2024-05-19T01:07:07.3597734+05:00;True|2024-05-14T11:56:39.9844037+05:00;True|2024-05-06T10:20:01.1890131+05:00;True|2024-05-01T16:59:50.4089951+05:00;True|2024-04-08T14:41:16.6006321+05:00;True|2024-03-26T19:56:42.7312052+05:00;True|2024-03-26T01:27:36.3506438+05:00;True|2024-03-26T00:50:58.8959598+05:00;True|2024-02-19T19:21:05.0850550+05:00;True|2024-01-11T01:15:20.3219157+05:00;True|2024-01-10T20:44:55.9941419+05:00;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+</Project>
