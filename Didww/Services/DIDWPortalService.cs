@@ -356,7 +356,7 @@ namespace Didww.Services
                     using (var reader = command.ExecuteReader())
                     {
                         if (reader.Read())
-                        {
+                        { 
                             //trunkid = reader["result"].ToString();
                         }
                     }

@@ -152,6 +152,8 @@ namespace Didww.Controllers
             string Params = "";
             var thirdParam = "DIDWWW";
             var fourthParam = "014";
+            var fifthParam = "";   // DID
+            var isHotMobile = false;
             try
              {
                 string ccode = GetCountryByDID(DID);
@@ -187,7 +189,7 @@ namespace Didww.Controllers
                 voice_trunck_link_self = null;
                 predesttrunkNo = "";
                 bool isValidPhoneNumber = true;
-                var message = "";
+                var message = "NA";
 
                 // Validate input parameters    
                 if (string.IsNullOrEmpty(PhoneNumber) || string.IsNullOrEmpty(DID) || string.IsNullOrEmpty(CountryCode))
@@ -197,10 +199,17 @@ namespace Didww.Controllers
                     if (isPortal == 1)
                         return Ok(0); //BadRequest("Invalid input parameters");
                     else
-                        return Ok("\"ERROR\",\"PhoneNumber/DID/CountryCode is null\"");
+                        return Ok("\"ERROR\",\"PhoneNumber/DID/CountryCode is null\",\"BZKINT\",\"014\",\"" + DID + "\"");
 
                     //return Ok(new { statusCode = "ERROR", StatusDescription = "PhoneNumber/DID/CountryCode is null" });
-                } 
+                }
+                
+                isHotMobile = CheckHotMobile(PhoneNumber);
+                message = isHotMobile == true ? "Hot Mobile" : "014";
+                thirdParam = message == "Hot Mobile" ? "DIDWWW" : "BZKINT";
+                fourthParam = message;
+                fifthParam = DID;
+
                 var result = await Getdid(DID);
                 bool isValidDID = result != null;
 
@@ -211,11 +220,10 @@ namespace Didww.Controllers
                     if (isPortal == 1)
                         return Ok(2); //BadRequest("Invalid phone number, DID, or country code");
                     else
-                        return Ok("\"ERROR\",\"DID is invalid\"");
+                        return Ok("\"ERROR\",\"DID is invalid\",\"" + thirdParam + "\",\"" + fourthParam + "\",\"" + fifthParam + "\"");
                 }
                 // Call the stored procedure with the provided parameters
                 string trunkid = "";
-                message = "NA";
                 var configuration = new ConfigurationBuilder()
                                     .SetBasePath(Directory.GetCurrentDirectory())
                                     .AddJsonFile("appsettings.json")
@@ -241,57 +249,16 @@ namespace Didww.Controllers
                         }
                     }
                 }
-                //if (trunkid == "Not Found")
+
+
+                if (!isHotMobile)
                 {
-                    HttpWebRequest request = CreateWEBSVCSWebRequest("http://websvcs-new.talknsave.net/IH_EXT_WS/BillingInfo.asmx?op=GetPhoneDetails");
-                    XmlDocument soapEnvelopeXml = new XmlDocument();
-                    soapEnvelopeXml.LoadXml(@"<?xml version=""1.0"" encoding=""utf-8""?>
-                    <soap:Envelope xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:soap=""http://schemas.xmlsoap.org/soap/envelope/"">
-                      <soap:Body>
-                        <GetPhoneDetails xmlns=""http://TNS-EXTERNAL.org/"">
-                          <strPhoneNumber>" + PhoneNumber + @"</strPhoneNumber>
-                        </GetPhoneDetails>
-                      </soap:Body>
-                    </soap:Envelope>");
+                    HttpWebRequest requestKNT;
+                    XmlDocument soapEnvelopeXmlKNT = new XmlDocument();
 
-                    using (Stream stream = request.GetRequestStream())
-                    {
-                        soapEnvelopeXml.Save(stream);
-                    }
-
-                    using (WebResponse response = request.GetResponse())
-                    {
-                        using (StreamReader rd = new StreamReader(response.GetResponseStream()))
-                        {
-                            string soapResult = rd.ReadToEnd();
-
-                            var rootElement = XElement.Parse(soapResult);
-
-                            XmlDocument xdoc = new XmlDocument();                            
-                            xdoc.LoadXml(soapResult);
-                            var isHotMobile = false;
-                            if (xdoc.GetElementsByTagName("bolFound")[0].InnerText == "true")
-                            {
-                                if (xdoc.GetElementsByTagName("intProviderCode")[0].InnerText == "77")
-                                {
-                                    isHotMobile = true;
-                                }
-                                else
-                                {
-                                    isHotMobile = false;
-                                }                                
-                            }
-                            message = isHotMobile == true ? "Hot Mobile" : "014";
-                            thirdParam = message == "Hot Mobile" ? "DIDWWW" : "BZKINT";
-                            fourthParam = message ;
-                            if (!isHotMobile)
-                            {
-                                HttpWebRequest requestKNT;
-                                XmlDocument soapEnvelopeXmlKNT = new XmlDocument();
-
-                                requestKNT = CreateWEBSVCSWebRequest("http://websvcs-new.talknsave.net/BezekIntlAPI/BezekIntlAPIWS.asmx?op=AddKNTForwarding");
-                                soapEnvelopeXmlKNT = new XmlDocument();
-                                soapEnvelopeXmlKNT.LoadXml(@"<?xml version=""1.0"" encoding=""utf-8""?>
+                    requestKNT = CreateWEBSVCSWebRequest("http://websvcs-new.talknsave.net/BezekIntlAPI/BezekIntlAPIWS.asmx?op=AddKNTForwarding");
+                    soapEnvelopeXmlKNT = new XmlDocument();
+                    soapEnvelopeXmlKNT.LoadXml(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <soap:Envelope xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:soap=""http://schemas.xmlsoap.org/soap/envelope/"">
   <soap:Body>
     <AddKNTForwarding xmlns=""http://talknsave.net/"">
@@ -301,84 +268,48 @@ namespace Didww.Controllers
     </AddKNTForwarding>
   </soap:Body>
 </soap:Envelope>");
-                                using (Stream stream = requestKNT.GetRequestStream())
-                                {
-                                    soapEnvelopeXmlKNT.Save(stream);
-                                }
+                    using (Stream stream = requestKNT.GetRequestStream())
+                    {
+                        soapEnvelopeXmlKNT.Save(stream);
+                    }
 
-                                using (WebResponse responseKNT = requestKNT.GetResponse())
-                                {
-                                    using (StreamReader rdKNT = new StreamReader(responseKNT.GetResponseStream()))
-                                    {
-                                        string soapResultKNT = rdKNT.ReadToEnd();
+                    using (WebResponse responseKNT = requestKNT.GetResponse())
+                    {
+                        using (StreamReader rdKNT = new StreamReader(responseKNT.GetResponseStream()))
+                        {
+                            string soapResultKNT = rdKNT.ReadToEnd();
 
-                                        var rootElementKNT = XElement.Parse(soapResultKNT);
+                            var rootElementKNT = XElement.Parse(soapResultKNT);
 
-                                        XmlDocument xdocKNT = new XmlDocument();
-                                        xdocKNT.LoadXml(soapResultKNT);
+                            XmlDocument xdocKNT = new XmlDocument();
+                            xdocKNT.LoadXml(soapResultKNT);
 
-                                        XmlNamespaceManager nsmgr = new XmlNamespaceManager(xdocKNT.NameTable);
-                                        nsmgr.AddNamespace("soap", "http://schemas.xmlsoap.org/soap/envelope/");
-                                        nsmgr.AddNamespace("tns", "http://talknsave.net/");
+                            XmlNamespaceManager nsmgr = new XmlNamespaceManager(xdocKNT.NameTable);
+                            nsmgr.AddNamespace("soap", "http://schemas.xmlsoap.org/soap/envelope/");
+                            nsmgr.AddNamespace("tns", "http://talknsave.net/");
 
-                                        XmlNode resultNode = xdocKNT.SelectSingleNode("//soap:Body/tns:AddKNTForwardingResponse/tns:AddKNTForwardingResult", nsmgr);
+                            XmlNode resultNode = xdocKNT.SelectSingleNode("//soap:Body/tns:AddKNTForwardingResponse/tns:AddKNTForwardingResult", nsmgr);
 
-                                        string res = resultNode.InnerText;
-                                        if (resultNode == null || res != "0")  
-                                        {
-                                            _didWPortalService.AddtblAPILog(isPortal, "014 API returned -99", Convert.ToInt32(CountryCode), 1, DID, PhoneNumber, "ERROR", Params, null, null, null, message, "-99", null);
-                                            if (isPortal == 1)
-                                                return Ok(0);
-                                            else
-                                                return Ok("\"ERROR\",\"014 API returned -99\",\"" + thirdParam + "\",\"" + fourthParam + "\"");
+                            string res = resultNode.InnerText;
+                            if (resultNode == null || res != "0")
+                            {
+                                _didWPortalService.AddtblAPILog(isPortal, "014 API returned -99", Convert.ToInt32(CountryCode), 1, DID, PhoneNumber, "ERROR", Params, null, null, null, message, "-99", null);
+                                if (isPortal == 1)
+                                    return Ok(0);
+                                else
+                                    return Ok("\"ERROR\",\"014 API returned -99\",\"" + thirdParam + "\",\"" + fourthParam + "\",\"" + fifthParam + "\"");
 
-                                            {
-                                                //return Ok("\"ERROR\",\"014 API returned -99\"");
-                                                //HttpContext.Response.Headers.Add("statusCode", "Error");
-                                                //HttpContext.Response.Headers.Add("StatusDescription", "014 API returned -99");
-                                                //return Ok(new { statusCode = "ERROR", StatusDescription = "014 API returned -99" });
-                                                //HttpStatusCode.OK;//Ok(400);
-                                                //return BadRequest(new { statusCode = "ERROR", message = "014 API returned -99" });
-                                                //return StatusCode(  99, new { StatusCode = "Error", Message = "014 API returned -99." });
-                                                //return BadRequest();//StatusCode(404, new { StatusCode = "Error", StatusDescription = "014 API returned -99" });
-                                                // HTTP 200 OK
-                                                //var apiResult = new
-                                                //{
-                                                //    statusCode = "Error",
-                                                //    StatusDescription = "014 API returned -99"
-                                                //};
-                                                //return Ok(apiResult);
-                                            };
-                                        }
-                                    }
-                                }
                             }
-
-
-                            trunkid = await _didWPortalService.CreateSIPTrunk(isHotMobile, DID, "972" + PhonewithoutZero);
-                            
                         }
                     }
-                    //if (response == 1 || response == 2 || response==4)
-                    //{
-                    //    PhoneNumber = CountryCode + PhoneNumber;
-                    //     var isHotMobile = response == 1 ? true : false;
-                    //     message = isHotMobile == true ? "Hot Mobile" : "014";
-                    //    Params = "Function: AddForwardRule, PhoneNumber: " + PhoneNumber + ", DID: " + DID ;
-                    //    trunkid = await _didWPortalService.CreateSIPTrunk(isHotMobile, DID, PhoneNumber);
-                    //    if (string.IsNullOrEmpty(trunkid))
-                    //    {  
-                    //        return Ok(3);
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    return Ok(4);
-                    //}
-                } 
+                }
+
+
+                trunkid = await _didWPortalService.CreateSIPTrunk(isHotMobile, DID, "972" + PhonewithoutZero);
                 var providercode = message == "Hot Mobile" ? 2 : 1; 
                 thirdParam = message == "Hot Mobile" ? "DIDWWW" : "BZKINT";
                 fourthParam = message;
+                fifthParam = DID;
 
 
                 if (!string.IsNullOrEmpty(trunkid))
@@ -452,7 +383,7 @@ namespace Didww.Controllers
                                 if (isPortal == 1)
                                     return Ok(true);
                                 else
-                                    return Ok("\"OK\",\"Success\",\""+ thirdParam + "\",\"" + fourthParam + "\"");
+                                    return Ok("\"OK\",\"Success\",\""+ thirdParam + "\",\"" + fourthParam + "\",\"" + fifthParam + "\"");
                             }
                         }
                     } 
@@ -460,7 +391,7 @@ namespace Didww.Controllers
                     if (isPortal == 1)
                         return Ok(response == "OK" ? true : false);
                     else
-                        return response == "OK"? Ok("\"OK\",\"Success\",\"" + thirdParam + "\",\"" + fourthParam + "\"") : Ok("\"ERROR\",\"404\",\"" + thirdParam + "\",\"" + fourthParam + "\"");
+                        return response == "OK"? Ok("\"OK\",\"Success\",\"" + thirdParam + "\",\"" + fourthParam + "\",\"" + fifthParam + "\"") : Ok("\"ERROR\",\"404\",\"" + thirdParam + "\",\"" + fourthParam + "\",\"" + fifthParam + "\"");
                 }
                 else
                 {
@@ -469,7 +400,7 @@ namespace Didww.Controllers
                     if (isPortal == 1)
                         return Ok(4);
                     else
-                        return Ok("\"ERROR\",\"404\",\"" + thirdParam + "\",\"" + fourthParam + "\"");
+                        return Ok("\"ERROR\",\"404\",\"" + thirdParam + "\",\"" + fourthParam + "\",\"" + fifthParam + "\"");
                 }
 
             }
@@ -488,7 +419,7 @@ namespace Didww.Controllers
                 if (isPortal == 1)
                     return Ok(0); // StatusCode(500, "Internal server error"); // or handle the error as appropriate for your application
                 else
-                    return Ok("\"ERROR\",\"An exception occurred:" + ex.Message + "\"");                
+                    return Ok("\"ERROR\",\"An exception occurred:" + ex.Message + "\",\"BZKINT\",\"014\",\"" + DID + "\"");
             }       
         }
         [HttpGet("VerifyNumber")]
@@ -1282,67 +1213,113 @@ namespace Didww.Controllers
                 return "Unknown"; // or handle the error as appropriate for your application
             }
         }
-        //async public Task<string> GetTrunk(string PhoneNumber)
-        //{
-        //    string voiceTrunk = $"{apiUrl}voice_in_trunks";
-        //    string name =  Guid.NewGuid().ToString();
-        //    string forwardRulePayload = $@"{{
-        //                    ""data"": {{
-        //                        ""type"": ""voice_in_trunks"",
-        //                        ""attributes"": {{
-        //                            ""name"": ""{name}"",
-        //                            ""capacity_limit"": 5,
-        //                            ""configuration"": {{
-        //                                ""type"": ""pstn_configurations"",
-        //                                ""attributes"": {{
-        //                                    ""dst"": ""{PhoneNumber}""
-        //                                }}
-        //                            }}
-        //                        }}
-        //                    }}
-        //                }}";
+        public bool CheckHotMobile(string PhoneNumber)
+        {
+            HttpWebRequest request = CreateWEBSVCSWebRequest("http://websvcs-new.talknsave.net/IH_EXT_WS/BillingInfo.asmx?op=GetPhoneDetails");
+            XmlDocument soapEnvelopeXml = new XmlDocument();
+            soapEnvelopeXml.LoadXml(@"<?xml version=""1.0"" encoding=""utf-8""?>
+                    <soap:Envelope xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:soap=""http://schemas.xmlsoap.org/soap/envelope/"">
+                      <soap:Body>
+                        <GetPhoneDetails xmlns=""http://TNS-EXTERNAL.org/"">
+                          <strPhoneNumber>" + PhoneNumber + @"</strPhoneNumber>
+                        </GetPhoneDetails>
+                      </soap:Body>
+                    </soap:Envelope>");
 
-        //    using (HttpClient client = new HttpClient())
-        //    {
-        //        client.DefaultRequestHeaders.Add("Api-Key", apiKey);
+            using (Stream stream = request.GetRequestStream())
+            {
+                soapEnvelopeXml.Save(stream);
+            }
 
-        //        // Corrected: Create a StringContent instance for the JSON payload
-        //        StringContent content = new StringContent(forwardRulePayload, Encoding.UTF8, "application/vnd.api+json");
+            var isHotMobile = false;
+            using (WebResponse response = request.GetResponse())
+            {
+                using (StreamReader rd = new StreamReader(response.GetResponseStream()))
+                {
+                    string soapResult = rd.ReadToEnd();
 
-        //        HttpResponseMessage response = await client.PostAsync(voiceTrunk, content);
+                    var rootElement = XElement.Parse(soapResult);
 
-        //        if (response.IsSuccessStatusCode)
-        //        {
-        //            string responseData = await response.Content.ReadAsStringAsync();
-        //            TrunkDTO apiResponse = JsonConvert.DeserializeObject<TrunkDTO>(responseData);
-        //            var configuration = new ConfigurationBuilder()
-        //             .SetBasePath(Directory.GetCurrentDirectory())
-        //             .AddJsonFile("appsettings.json")
-        //             .Build();
+                    XmlDocument xdoc = new XmlDocument();
+                    xdoc.LoadXml(soapResult);
+                    if (xdoc.GetElementsByTagName("bolFound")[0].InnerText == "true")
+                    {
+                        if (xdoc.GetElementsByTagName("intProviderCode")[0].InnerText == "77")
+                        {
+                            isHotMobile = true;
+                        }
+                        else
+                        {
+                            isHotMobile = false;
+                        }
+                    }
 
-        //            var connectionString = configuration.GetConnectionString("DIDDbConnection");
-        //            using (var connection = new SqlConnection(connectionString))
-        //            {
-        //                // Open the database connection
-        //                connection.Open();
+                }
+            }
+                    return isHotMobile;
+             
+        }
+            //async public Task<string> GetTrunk(string PhoneNumber)
+            //{
+            //    string voiceTrunk = $"{apiUrl}voice_in_trunks";
+            //    string name =  Guid.NewGuid().ToString();
+            //    string forwardRulePayload = $@"{{
+            //                    ""data"": {{
+            //                        ""type"": ""voice_in_trunks"",
+            //                        ""attributes"": {{
+            //                            ""name"": ""{name}"",
+            //                            ""capacity_limit"": 5,
+            //                            ""configuration"": {{
+            //                                ""type"": ""pstn_configurations"",
+            //                                ""attributes"": {{
+            //                                    ""dst"": ""{PhoneNumber}""
+            //                                }}
+            //                            }}
+            //                        }}
+            //                    }}
+            //                }}";
 
-        //                using (var command = new SqlCommand("insert_trunk_in_record", connection))
-        //                {
-        //                    command.CommandType = CommandType.StoredProcedure;
-        //                    command.Parameters.AddWithValue("@did_id", didid);
-        //                    command.Parameters.AddWithValue("@voice_in_trunk", apiResponse.data.id);
-        //                    command.ExecuteNonQuery();
-        //                }
-        //                return apiResponse.data.id;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            // Handle the error response
-        //            return "";
-        //        }
-        //    }
+            //    using (HttpClient client = new HttpClient())
+            //    {
+            //        client.DefaultRequestHeaders.Add("Api-Key", apiKey);
 
-        //}
-    }
+            //        // Corrected: Create a StringContent instance for the JSON payload
+            //        StringContent content = new StringContent(forwardRulePayload, Encoding.UTF8, "application/vnd.api+json");
+
+            //        HttpResponseMessage response = await client.PostAsync(voiceTrunk, content);
+
+            //        if (response.IsSuccessStatusCode)
+            //        {
+            //            string responseData = await response.Content.ReadAsStringAsync();
+            //            TrunkDTO apiResponse = JsonConvert.DeserializeObject<TrunkDTO>(responseData);
+            //            var configuration = new ConfigurationBuilder()
+            //             .SetBasePath(Directory.GetCurrentDirectory())
+            //             .AddJsonFile("appsettings.json")
+            //             .Build();
+
+            //            var connectionString = configuration.GetConnectionString("DIDDbConnection");
+            //            using (var connection = new SqlConnection(connectionString))
+            //            {
+            //                // Open the database connection
+            //                connection.Open();
+
+            //                using (var command = new SqlCommand("insert_trunk_in_record", connection))
+            //                {
+            //                    command.CommandType = CommandType.StoredProcedure;
+            //                    command.Parameters.AddWithValue("@did_id", didid);
+            //                    command.Parameters.AddWithValue("@voice_in_trunk", apiResponse.data.id);
+            //                    command.ExecuteNonQuery();
+            //                }
+            //                return apiResponse.data.id;
+            //            }
+            //        }
+            //        else
+            //        {
+            //            // Handle the error response
+            //            return "";
+            //        }
+            //    }
+
+            //}
+        }
 }
